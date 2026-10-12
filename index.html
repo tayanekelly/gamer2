@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Jogo - Fase 1: Cuidado em Casa</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #1a1a1a;
+            color: #fff;
+            overflow: hidden;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        /* Painel de Status (HUD) estilo The Sims */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 2px solid #444;
+            width: 300px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        #hud h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #ffcc00;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        .status-bar-container {
+            margin-bottom: 8px;
+        }
+        .status-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+        #fill-fome { background: #e74c3c; }
+        #fill-remedio { background: #3498db; }
+        #fill-curativo { background: #e67e22; }
+        #fill-companhia { background: #9b59b6; }
+        #fill-recuperacao { background: #2ecc71; }
+
+        /* Painel de Ações */
+        #actions-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 2px solid #444;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .action-btn {
+            background: #2c3e50;
+            color: white;
+            border: 2px solid #34495e;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background: #34495e;
+            border-color: #ffcc00;
+            transform: translateY(-2px);
+        }
+        #game-message {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #444;
+            max-width: 250px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <!-- HUD de Status da Personagem -->
+    <div id="hud">
+        <h2>Status da Boneca</h2>
+        <div class="status-bar-container">
+            <div class="status-label"><span>Fome / Nutrição</span><span id="txt-fome">100%</span></div>
+            <div class="progress-bar"><div id="fill-fome" class="progress-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="status-bar-container">
+            <div class="status-label"><span>Remédios / Dor</span><span id="txt-remedio">100%</span></div>
+            <div class="progress-bar"><div id="fill-remedio" class="progress-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="status-bar-container">
+            <div class="status-label"><span>Curativos</span><span id="txt-curativo">100%</span></div>
+            <div class="progress-bar"><div id="fill-curativo" class="progress-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="status-bar-container">
+            <div class="status-label"><span>Companhia / Moral</span><span id="txt-companhia">100%</span></div>
+            <div class="progress-bar"><div id="fill-companhia" class="progress-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="status-bar-container" style="margin-top: 10px; border-top: 1px dashed #444; padding-top: 8px;">
+            <div class="status-label"><span style="color: #2ecc71; font-weight: bold;">Recuperação Física</span><span id="txt-recuperacao">0%</span></div>
+            <div class="progress-bar"><div id="fill-recuperacao" class="progress-fill" style="width: 0%;"></div></div>
+        </div>
+    </div>
+
+    <!-- Mensagem de Orientações -->
+    <div id="game-message">
+        <strong>Fase 1: Cuidados no Apartamento</strong><br>
+        O acidente aconteceu. O namorado precisa cuidar da boneca para ela recuperar as forças. Use os botões abaixo para realizar ações de cuidado!
+    </div>
+
+    <!-- Painel de Ações do Namorado -->
+    <div id="actions-panel">
+        <button class="action-btn" onclick="darComida()">🍽️ Dar Comida</button>
+        <button class="action-btn" onclick="darRemedio()">💊 Dar Remédio</button>
+        <button class="action-btn" onclick="trocarCurativo()">🩹 Trocar Curativo</button>
+        <button class="action-btn" onclick="fazerCompanhia()">💬 Fazer Companhia</button>
+        <button class="action-btn" onclick="fazerExercicio()" style="border-color: #2ecc71;">🏋️ Exercício Físico</button>
+    </div>
+
+    <!-- Importando o Three.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // --- 1. CONFIGURAÇÃO DA CENA 3D (THREE.JS) ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111111);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(12, 14, 16);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        // Iluminação estilo maquete (The Sims)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // --- 2. CONSTRUÇÃO DA CASA EM CORTE (DOLLHOUSE VIEW) ---
+        // Piso principal dividindo os cômodos
+        const pisoGeo = new THREE.BoxGeometry(10, 0.2, 8);
+        const pisoMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 });
+        const piso = new THREE.Mesh(pisoGeo, pisoMat);
+        piso.position.y = -0.1;
+        scene.add(piso);
+
+        // Paredes em corte (apenas fundo e laterais para manter a visão aberta)
+        const paredeMat = new THREE.MeshStandardMaterial({ color: 0xd7ccc8, transparent: true, opacity: 0.85 });
+        
+        // Parede dosFundos
+        const paredeFundo = new THREE.Mesh(new THREE.BoxGeometry(10, 3, 0.2), paredeMat);
+        paredeFundo.position.set(0, 1.5, -4);
+        scene.add(paredeFundo);
+
+        // Parede Esquerda
+        const paredeEsq = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 8), paredeMat);
+        paredeEsq.position.set(-5, 1.5, 0);
+        scene.add(paredeEsq);
+
+        // Divisória interna (Quarto / Sala)
+        const divisorMat = new THREE.MeshStandardMaterial({ color: 0xbcaaa4 });
+        const divisor = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3, 4), divisorMat);
+        divisor.position.set(1, 1.5, -2);
+        scene.add(divisor);
+
+        // --- 3. PERSONAGENS LOW-POLY ---
+        // Boneca (acamada no quarto - lado esquerdo)
+        const bonecaMat = new THREE.MeshStandardMaterial({ color: 0xe91e63 }); // Rosa/Vermelho
+        const bonecaGroup = new THREE.Group();
+        
+        const corpoBoneca = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.6), bonecaMat);
+        corpoBoneca.position.set(-3, 0.3, -2);
+        bonecaGroup.add(corpoBoneca);
+        scene.add(bonecaGroup);
+
+        // Namorado (em pé na sala/corredor - lado direito)
+        const namoradoMat = new THREE.MeshStandardMaterial({ color: 0x2196f3 }); // Azul
+        const namoradoGroup = new THREE.Group();
+        
+        const corpoNamorado = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 0.5), namoradoMat);
+        corpoNamorado.position.set(2, 0.7, 1);
+        namoradoGroup.add(corpoNamorado);
+        scene.add(namoradoGroup);
+
+        // --- 4. SISTEMA DE ESTADOS E MECÂNICAS ---
+        let status = {
+            fome: 80,
+            remedio: 70,
+            curativo: 75,
+            companhia: 90,
+            recuperacao: 0
+        };
+
+        function atualizarHUD() {
+            // Atualiza barras de progresso
+            document.getElementById('fill-fome').style.width = status.fome + '%';
+            document.getElementById('txt-fome').innerText = Math.round(status.fome) + '%';
+
+            document.getElementById('fill-remedio').style.width = status.remedio + '%';
+            document.getElementById('txt-remedio').innerText = Math.round(status.remedio) + '%';
+
+            document.getElementById('fill-curativo').style.width = status.curativo + '%';
+            document.getElementById('txt-curativo').innerText = Math.round(status.curativo) + '%';
+
+            document.getElementById('fill-companhia').style.width = status.companhia + '%';
+            document.getElementById('txt-companhia').innerText = Math.round(status.companhia) + '%';
+
+            document.getElementById('fill-recuperacao').style.width = status.recuperacao + '%';
+            document.getElementById('txt-recuperacao').innerText = Math.round(status.recuperacao) + '%';
+
+            // Verifica vitória da Fase 1
+            if (status.recuperacao >= 100) {
+                document.getElementById('game-message').innerHTML = "<strong>🎉 Fase 1 Concluída!</strong><br>A boneca recuperou as forças e já consegue se levantar! Preparada para a Fase 2 (Avenida / Rua)?";
+            }
+        }
+
+        // Funções de Ação do Jogador (Namorado)
+        function darComida() {
+            status.fome = Math.min(100, status.fome + 25);
+            status.companhia = Math.min(100, status.companhia + 5);
+            atualizarHUD();
+        }
+
+        function darRemedio() {
+            status.remedio = Math.min(100, status.remedio + 30);
+            atualizarHUD();
+        }
+
+        function trocarCurativo() {
+            status.curativo = Math.min(100, status.curativo + 35);
+            atualizarHUD();
+        }
+
+        function fazerCompanhia() {
+            status.companhia = Math.min(100, status.companhia + 30);
+            atualizarHUD();
+        }
+
+        function fazerExercicio() {
+            // Exercício só é eficaz se os status básicos estiverem bons (> 50%)
+            if (status.fome > 50 && status.remedio > 50 && status.curativo > 50) {
+                status.recuperacao = Math.min(100, status.recuperacao + 15);
+                // O exercício gasta um pouco de energia
+                status.fome = Math.max(0, status.fome - 10);
+                status.companhia = Math.min(100, status.companhia + 10);
+                document.getElementById('game-message').innerHTML = "<strong>Exercício realizado!</strong><br>Com paciência e apoio, os músculos estão reabilitando.";
+            } else {
+                document.getElementById('game-message').innerHTML = "<strong>Atenção!</strong><br>Ela está muito fraca ou com dor. Cuide da fome, remédios e curativos antes de tentar os exercícios!";
+            }
+            atualizarHUD();
+        }
+
+        // --- 5. LOOP DE DECAIMENTO NATURAL (SIMULAÇÃO) ---
+        // Com o tempo, os status caem gradativamente exigindo atenção contínua
+        setInterval(() => {
+            if (status.recuperacao < 100) {
+                status.fome = Math.max(0, status.fome - 1.5);
+                status.remedio = Math.max(0, status.remedio - 2.0);
+                status.curativo = Math.max(0, status.curativo - 1.0);
+                status.companhia = Math.max(0, status.companhia - 1.2);
+                atualizarHUD();
+            }
+        }, 3000);
+
+        // --- 6. ANIMAÇÃO DA CENA 3D ---
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Pequeno balanço suave para dar vida aos bonecos
+            const elapsedTime = clock.getElapsedTime();
+            namoradoGroup.position.y = Math.sin(elapsedTime * 2) * 0.05;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Ajustar janela se o navegador mudar de tamanho
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
