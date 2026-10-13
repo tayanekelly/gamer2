@@ -1,11 +1,9 @@
-ra);
-        }
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cuidando Dela - Fase 1 & 2: Amor, Recuperação e Sobrevivência</title>
+    <title>Cuidando Dela - Amor, Recuperação e Sobrevivência</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -14,11 +12,11 @@ ra);
             user-select: none;
             overflow: hidden;
             background-color: #0f172a;
+            touch-action: manipulation;
         }
         h1, h2, h3, button {
             font-family: 'Fredoka', sans-serif;
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -27,22 +25,22 @@ ra);
             border-radius: 3px;
         }
         .glass-panel {
-            background: rgba(15, 23, 42, 0.82);
+            background: rgba(15, 23, 42, 0.88);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
         .sims-btn {
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-tap-highlight-color: transparent;
         }
         .sims-btn:hover:not(:disabled) {
-            transform: translateY(-3px) scale(1.03);
+            transform: translateY(-2px) scale(1.02);
             box-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.4);
         }
         .sims-btn:active:not(:disabled) {
-            transform: translateY(1px) scale(0.98);
+            transform: translateY(1px) scale(0.96);
         }
-        /* Speech Bubble Floating Effect */
         @keyframes floatUp {
             0% { transform: translateY(0) scale(0.8); opacity: 0; }
             20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
@@ -52,6 +50,13 @@ ra);
         .floating-bubble {
             animation: floatUp 2.5s ease-out forwards;
         }
+        @keyframes pulseTarget {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+        .pulse-target {
+            animation: pulseTarget 1s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="w-screen h-screen relative select-none bg-slate-900 text-white overflow-hidden">
@@ -60,187 +65,230 @@ ra);
     <div id="canvas-container" class="w-full h-full absolute inset-0 z-0 cursor-grab active:cursor-grabbing"></div>
 
     <!-- UI Overlay - Top Center: Global Progress Bar -->
-    <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-11/12 max-w-xl glass-panel rounded-full px-6 py-3 border border-emerald-500/40 shadow-xl">
-        <div class="flex justify-between items-center text-xs font-extrabold mb-1.5">
-            <span id="phase-title" class="text-pink-300 tracking-wider uppercase flex items-center gap-1.5">
+    <div class="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 z-20 w-11/12 max-w-xl glass-panel rounded-full px-4 sm:px-6 py-2 sm:py-3 border border-emerald-500/40 shadow-xl">
+        <div class="flex justify-between items-center text-xs font-extrabold mb-1">
+            <span id="phase-title" class="text-pink-300 tracking-wider uppercase flex items-center gap-1.5 text-[11px] sm:text-xs">
                 <span>🏡</span> Fase 1: Cuidados com Tayane
             </span>
-            <span id="txt-progresso-geral" class="text-emerald-400 font-black text-sm">0%</span>
+            <span id="txt-progresso-geral" class="text-emerald-400 font-black text-xs sm:text-sm">0%</span>
         </div>
-        <div class="w-full h-3.5 bg-slate-950/80 rounded-full overflow-hidden p-0.5 border border-slate-700">
+        <div class="w-full h-2.5 sm:h-3.5 bg-slate-950/80 rounded-full overflow-hidden p-0.5 border border-slate-700">
             <div id="fill-progresso-geral" class="h-full bg-gradient-to-r from-pink-500 via-purple-500 to-emerald-400 rounded-full transition-all duration-300 shadow-lg shadow-emerald-500/50" style="width: 0%;"></div>
         </div>
     </div>
 
     <!-- UI Overlay - Top Left: Character Status HUD (Phase 1) -->
-    <div id="hud-phase1" class="absolute top-20 left-4 z-10 w-80 glass-panel rounded-2xl p-4 transition-all duration-300">
-        <div class="flex items-center gap-3 mb-3 border-b border-slate-700/60 pb-2.5">
-            <div class="relative">
-                <div class="w-11 h-11 rounded-full bg-pink-500/20 border-2 border-pink-400 flex items-center justify-center text-xl">
+    <div id="hud-phase1" class="absolute top-14 sm:top-20 left-2 sm:left-4 z-10 w-[calc(100%-1rem)] max-w-[280px] sm:max-w-xs glass-panel rounded-2xl p-3 sm:p-4 transition-all duration-300">
+        <div class="flex items-center gap-2.5 mb-2 border-b border-slate-700/60 pb-2">
+            <div class="relative shrink-0">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-pink-500/20 border-2 border-pink-400 flex items-center justify-center text-lg sm:text-xl">
                     👧🏻
                 </div>
-                <div id="status-indicator" class="w-3.5 h-3.5 bg-emerald-400 border-2 border-slate-900 rounded-full absolute -bottom-0.5 -right-0.5 animate-pulse"></div>
+                <div id="status-indicator" class="w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full absolute -bottom-0.5 -right-0.5 animate-pulse"></div>
             </div>
-            <div>
-                <h2 class="text-base font-bold text-pink-300 leading-tight">Tayane (Em Recuperação)</h2>
-                <p id="status-text-summary" class="text-xs text-slate-300">Descansando na cama...</p>
+            <div class="min-w-0">
+                <h2 class="text-xs sm:text-base font-bold text-pink-300 leading-tight truncate">Tayane (Em Recuperação)</h2>
+                <p id="status-text-summary" class="text-[10px] sm:text-xs text-slate-300 truncate">Descansando na cama...</p>
             </div>
         </div>
 
-        <!-- Status Bars -->
-        <div class="space-y-2.5 text-xs">
-            <!-- Fome -->
+        <div class="space-y-1.5 sm:space-y-2.5 text-[11px] sm:text-xs">
             <div>
-                <div class="flex justify-between font-semibold mb-1">
-                    <span class="flex items-center gap-1 text-amber-300">🥗 Fome / Nutrição</span>
+                <div class="flex justify-between font-semibold mb-0.5">
+                    <span class="flex items-center gap-1 text-amber-300">🥗 Fome</span>
                     <span id="txt-fome" class="text-amber-200">80%</span>
                 </div>
-                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
                     <div id="fill-fome" class="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-500" style="width: 80%;"></div>
                 </div>
             </div>
 
-            <!-- Remédio / Dor -->
             <div>
-                <div class="flex justify-between font-semibold mb-1">
-                    <span class="flex items-center gap-1 text-cyan-300">💊 Analgésicos / Controle da Dor</span>
+                <div class="flex justify-between font-semibold mb-0.5">
+                    <span class="flex items-center gap-1 text-cyan-300">💊 Remédios</span>
                     <span id="txt-remedio" class="text-cyan-200">70%</span>
                 </div>
-                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
                     <div id="fill-remedio" class="h-full bg-gradient-to-r from-cyan-500 to-blue-400 rounded-full transition-all duration-500" style="width: 70%;"></div>
                 </div>
             </div>
 
-            <!-- Curativos -->
             <div>
-                <div class="flex justify-between font-semibold mb-1">
-                    <span class="flex items-center gap-1 text-orange-300">🩹 Curativos Limpos</span>
+                <div class="flex justify-between font-semibold mb-0.5">
+                    <span class="flex items-center gap-1 text-orange-300">🩹 Curativos</span>
                     <span id="txt-curativo" class="text-orange-200">75%</span>
                 </div>
-                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
                     <div id="fill-curativo" class="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500" style="width: 75%;"></div>
                 </div>
             </div>
 
-            <!-- Companhia -->
             <div>
-                <div class="flex justify-between font-semibold mb-1">
-                    <span class="flex items-center gap-1 text-purple-300">💜 Ânimo & Companhia</span>
+                <div class="flex justify-between font-semibold mb-0.5">
+                    <span class="flex items-center gap-1 text-purple-300">💜 Ánimo</span>
                     <span id="txt-companhia" class="text-purple-200">85%</span>
                 </div>
-                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
                     <div id="fill-companhia" class="h-full bg-gradient-to-r from-purple-500 to-pink-400 rounded-full transition-all duration-500" style="width: 85%;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- UI Overlay - Top Left: Phase 2 Combat HUD (Hidden initially) -->
-    <div id="hud-phase2" class="absolute top-20 left-4 z-10 w-80 glass-panel rounded-2xl p-4 transition-all duration-300 hidden border-2 border-red-500/50">
-        <div class="flex items-center gap-3 mb-3 border-b border-slate-700/60 pb-2.5">
-            <div class="w-11 h-11 rounded-full bg-red-500/20 border-2 border-red-400 flex items-center justify-center text-xl">
+    <!-- UI Overlay - Phase 2 HUD -->
+    <div id="hud-phase2" class="absolute top-14 sm:top-20 left-2 sm:left-4 z-10 w-[calc(100%-1rem)] max-w-[280px] sm:max-w-xs glass-panel rounded-2xl p-3 sm:p-4 transition-all duration-300 hidden border-2 border-red-500/50">
+        <div class="flex items-center gap-2.5 mb-2 border-b border-slate-700/60 pb-2">
+            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-red-500/20 border-2 border-red-400 flex items-center justify-center text-lg sm:text-xl shrink-0">
                 ♿
             </div>
             <div>
-                <h2 class="text-base font-bold text-red-300 leading-tight">A Caminho do Médico!</h2>
-                <p class="text-xs text-slate-300">Proteja a Tayane dos Zumbis!</p>
+                <h2 class="text-xs sm:text-base font-bold text-red-300 leading-tight truncate">A Caminho do Médico!</h2>
+                <p class="text-[10px] sm:text-xs text-slate-300 truncate">Proteja a Tayane dos Zumbis!</p>
             </div>
         </div>
 
-        <div class="space-y-3 text-xs">
+        <div class="space-y-2 text-[11px] sm:text-xs">
             <div>
                 <div class="flex justify-between font-semibold mb-1">
                     <span class="flex items-center gap-1 text-rose-300">❤️ Vida do Grupo</span>
                     <span id="txt-vida-p2" class="text-rose-200">100%</span>
                 </div>
-                <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
                     <div id="fill-vida-p2" class="h-full bg-gradient-to-r from-red-600 to-rose-400 rounded-full transition-all duration-300" style="width: 100%;"></div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 text-center pt-2 border-t border-slate-700/60">
-                <div class="bg-slate-800/80 p-2 rounded-xl border border-slate-700">
-                    <span class="block text-[10px] text-slate-400 uppercase">Zumbis Derrotados</span>
-                    <span id="txt-zumbis-derrotados" class="text-lg font-extrabold text-amber-400">0</span>
+            <div class="grid grid-cols-2 gap-2 text-center pt-1.5 border-t border-slate-700/60">
+                <div class="bg-slate-800/80 p-1.5 rounded-xl border border-slate-700">
+                    <span class="block text-[9px] sm:text-[10px] text-slate-400 uppercase">Derrotados</span>
+                    <span id="txt-zumbis-derrotados" class="text-base sm:text-lg font-extrabold text-amber-400">0</span>
                 </div>
-                <div class="bg-slate-800/80 p-2 rounded-xl border border-slate-700">
-                    <span class="block text-[10px] text-slate-400 uppercase">Pontos de Caio</span>
-                    <span id="txt-pontos-p2" class="text-lg font-extrabold text-emerald-400">0</span>
+                <div class="bg-slate-800/80 p-1.5 rounded-xl border border-slate-700">
+                    <span class="block text-[9px] sm:text-[10px] text-slate-400 uppercase">Pontos</span>
+                    <span id="txt-pontos-p2" class="text-base sm:text-lg font-extrabold text-emerald-400">0</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- UI Overlay - Top Right: Story / Guidance -->
-    <div class="absolute top-20 right-4 z-10 max-w-xs glass-panel rounded-2xl p-4 border-l-4 border-l-pink-500 hidden sm:block">
+    <!-- UI Overlay - Phase 3 HUD -->
+    <div id="hud-phase3" class="absolute top-14 sm:top-20 left-2 sm:left-4 z-10 w-[calc(100%-1rem)] max-w-[280px] sm:max-w-xs glass-panel rounded-2xl p-3 sm:p-4 transition-all duration-300 hidden border-2 border-emerald-500/50">
+        <div class="flex items-center gap-2.5 mb-2 border-b border-slate-700/60 pb-2">
+            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-lg sm:text-xl shrink-0">
+                🚶🏻‍♀️
+            </div>
+            <div>
+                <h2 class="text-xs sm:text-base font-bold text-emerald-300 leading-tight truncate">Primeiros Passos!</h2>
+                <p class="text-[10px] sm:text-xs text-slate-300 truncate">Ajuste o ritmo para dar cada passo</p>
+            </div>
+        </div>
+
+        <div class="space-y-2 text-[11px] sm:text-xs">
+            <div>
+                <div class="flex justify-between font-semibold mb-1">
+                    <span class="flex items-center gap-1 text-emerald-300">👣 Passos Concluídos</span>
+                    <span id="txt-passos-p3" class="text-emerald-200">0 / 20</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                    <div id="fill-passos-p3" class="h-full bg-gradient-to-r from-emerald-500 to-teal-300 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/80 p-2 rounded-xl border border-slate-700 text-center">
+                <span class="block text-[10px] text-slate-400 uppercase font-bold">Feedback do Passo</span>
+                <span id="txt-rhythm-feedback" class="text-sm font-extrabold text-amber-300">Pronto para começar!</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay - Top Right Narrative -->
+    <div class="absolute top-20 right-4 z-10 max-w-xs glass-panel rounded-2xl p-4 border-l-4 border-l-pink-500 hidden md:block">
         <h3 class="font-bold text-pink-300 text-sm flex items-center gap-1.5 mb-1" id="narrative-title">
             <span>🏡</span> Fase 1: O Apartamento
         </h3>
         <p class="text-xs text-slate-300 leading-relaxed" id="narrative-box">
-            Tayane está em repouso após a queda do 3º andar. Caio precisa cuidar dela até ela atingir 100% de recuperação e ir ao médico!
+            Tayane está em repouso após a queda do 3º andar. Victor precisa cuidar dela até ela atingir 100% de recuperação e ir ao médico!
         </p>
     </div>
 
-    <!-- UI Overlay - Bottom Center: Action Controls (Phase 1) -->
-    <div id="controls-phase1" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 w-11/12 max-w-2xl glass-panel rounded-2xl p-3 sm:p-4">
-        <div class="text-center text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider hidden sm:block">
-            Ações do Caio
+    <!-- Controls Phase 1 -->
+    <div id="controls-phase1" class="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 w-[96%] max-w-2xl glass-panel rounded-2xl p-2 sm:p-4">
+        <div class="text-center text-[10px] sm:text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider hidden sm:block">
+            Ações do Victor
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2" id="action-buttons-group">
-            <button onclick="triggerAction('comida')" id="btn-comida" class="sims-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/80 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-400 text-amber-200">
-                <span class="text-2xl mb-0.5">🥗</span>
-                <span class="text-xs font-bold">Dar Comida</span>
-                <span class="text-[10px] text-slate-400">Ir à Cozinha</span>
+        <div class="grid grid-cols-5 gap-1.5 sm:gap-2" id="action-buttons-group">
+            <button onclick="triggerAction('comida')" id="btn-comida" class="sims-btn flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-xl bg-slate-800/80 active:bg-amber-500/30 border border-amber-500/30 text-amber-200">
+                <span class="text-xl sm:text-2xl mb-0.5">🥗</span>
+                <span class="text-[10px] sm:text-xs font-bold leading-tight">Comida</span>
             </button>
 
-            <button onclick="triggerAction('remedio')" id="btn-remedio" class="sims-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/80 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-400 text-cyan-200">
-                <span class="text-2xl mb-0.5">💊</span>
-                <span class="text-xs font-bold">Remédio</span>
-                <span class="text-[10px] text-slate-400">Armário</span>
+            <button onclick="triggerAction('remedio')" id="btn-remedio" class="sims-btn flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-xl bg-slate-800/80 active:bg-cyan-500/30 border border-cyan-500/30 text-cyan-200">
+                <span class="text-xl sm:text-2xl mb-0.5">💊</span>
+                <span class="text-[10px] sm:text-xs font-bold leading-tight">Remédio</span>
             </button>
 
-            <button onclick="triggerAction('curativo')" id="btn-curativo" class="sims-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/80 hover:bg-orange-500/20 border border-orange-500/30 hover:border-orange-400 text-orange-200">
-                <span class="text-2xl mb-0.5">🩹</span>
-                <span class="text-xs font-bold">Curativos</span>
-                <span class="text-[10px] text-slate-400">Kit Médico</span>
+            <button onclick="triggerAction('curativo')" id="btn-curativo" class="sims-btn flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-xl bg-slate-800/80 active:bg-orange-500/30 border border-orange-500/30 text-orange-200">
+                <span class="text-xl sm:text-2xl mb-0.5">🩹</span>
+                <span class="text-[10px] sm:text-xs font-bold leading-tight">Curativo</span>
             </button>
 
-            <button onclick="triggerAction('companhia')" id="btn-companhia" class="sims-btn flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-800/80 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-400 text-purple-200">
-                <span class="text-2xl mb-0.5">💬</span>
-                <span class="text-xs font-bold">Companhia</span>
-                <span class="text-[10px] text-slate-400">Conversar</span>
+            <button onclick="triggerAction('companhia')" id="btn-companhia" class="sims-btn flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-xl bg-slate-800/80 active:bg-purple-500/30 border border-purple-500/30 text-purple-200">
+                <span class="text-xl sm:text-2xl mb-0.5">💬</span>
+                <span class="text-[10px] sm:text-xs font-bold leading-tight">Conversar</span>
             </button>
 
-            <button onclick="triggerAction('exercicio')" id="btn-exercicio" class="sims-btn col-span-2 sm:col-span-1 flex flex-col items-center justify-center p-2.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-500/20 border border-emerald-500/50 hover:border-emerald-400 text-emerald-300">
-                <span class="text-2xl mb-0.5">🏋️</span>
-                <span class="text-xs font-bold">Fisioterapia</span>
-                <span class="text-[10px] text-emerald-400 font-semibold">+Progresso</span>
+            <button onclick="triggerAction('exercicio')" id="btn-exercicio" class="sims-btn flex flex-col items-center justify-center p-1.5 sm:p-2.5 rounded-xl bg-emerald-950/80 active:bg-emerald-500/30 border border-emerald-500/50 text-emerald-300">
+                <span class="text-xl sm:text-2xl mb-0.5">🏋️</span>
+                <span class="text-[10px] sm:text-xs font-bold leading-tight">Treino</span>
             </button>
         </div>
     </div>
 
-    <!-- UI Overlay - Bottom Center: Action Controls (Phase 2) -->
-    <div id="controls-phase2" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 w-11/12 max-w-xl glass-panel rounded-2xl p-3 sm:p-4 hidden border-2 border-red-500/40">
-        <div class="text-center text-xs font-bold text-red-300 mb-2 uppercase tracking-wider">
-            Controles da Cadeira de Rodas & Ataque
+    <!-- Controls Phase 2 -->
+    <div id="controls-phase2" class="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 w-[96%] max-w-xl glass-panel rounded-2xl p-2.5 sm:p-4 hidden border-2 border-red-500/40">
+        <div class="text-center text-[10px] sm:text-xs font-bold text-red-300 mb-1.5 uppercase tracking-wider">
+            Controles da Cadeira & Ataque
         </div>
         <div class="grid grid-cols-3 gap-2">
-            <button onclick="moveWheelchair(-1.2)" class="sims-btn p-3 rounded-xl bg-slate-800 hover:bg-blue-600/30 border border-blue-500/40 text-blue-200 font-bold flex items-center justify-center gap-1">
-                ⬅️ Avançar Rua
+            <button onclick="moveWheelchair(-0.8)" class="sims-btn p-3 sm:p-3.5 rounded-xl bg-slate-800 active:bg-blue-600/40 border border-blue-500/40 text-blue-200 font-bold flex items-center justify-center gap-1 text-xs sm:text-sm">
+                ⬅️ Recuar
             </button>
-            <button onclick="caioAttackZombie()" class="sims-btn p-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-extrabold flex items-center justify-center gap-1 shadow-lg shadow-red-600/40 animate-pulse">
-                ⚔️ Atacar Zumbi!
+            <button onclick="victorAttackZombie()" class="sims-btn p-3 sm:p-3.5 rounded-xl bg-red-600 active:bg-red-500 text-white font-extrabold flex items-center justify-center gap-1 shadow-lg shadow-red-600/40 animate-pulse text-xs sm:text-sm">
+                ⚔️ Atacar!
             </button>
-            <button onclick="moveWheelchair(1.2)" class="sims-btn p-3 rounded-xl bg-slate-800 hover:bg-blue-600/30 border border-blue-500/40 text-blue-200 font-bold flex items-center justify-center gap-1">
-                Avançar Médico ➡️
+            <button onclick="moveWheelchair(0.8)" class="sims-btn p-3 sm:p-3.5 rounded-xl bg-slate-800 active:bg-blue-600/40 border border-blue-500/40 text-blue-200 font-bold flex items-center justify-center gap-1 text-xs sm:text-sm">
+                Avançar ➡️
             </button>
         </div>
     </div>
 
-    <!-- Floating Action Feedback Bubbles Overlay -->
+    <!-- Controls Phase 3 -->
+    <div id="controls-phase3" class="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 w-[96%] max-w-lg glass-panel rounded-2xl p-3 sm:p-4 hidden border-2 border-emerald-500/40">
+        <div class="text-center text-[10px] sm:text-xs font-bold text-emerald-300 mb-2 uppercase tracking-wider">
+            Sincronize o Passo com o Andador
+        </div>
+
+        <div class="relative w-full h-8 bg-slate-950 rounded-xl overflow-hidden mb-3 border border-slate-700 flex items-center">
+            <div class="absolute left-1/2 -translate-x-1/2 w-16 h-full bg-emerald-500/40 border-x-2 border-emerald-400 pulse-target flex items-center justify-center text-[10px] font-extrabold text-emerald-200 uppercase">
+                ZONA
+            </div>
+            <div id="rhythm-indicator" class="absolute top-0 bottom-0 w-3 bg-pink-400 rounded-full shadow-lg shadow-pink-500/80 transition-none" style="left: 0%;"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="stepRhythm('left')" class="sims-btn p-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 active:scale-95 text-white font-extrabold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
+                🦶 Passo Esquerdo (👈)
+            </button>
+            <button onclick="stepRhythm('right')" class="sims-btn p-3.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 active:scale-95 text-white font-extrabold text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2">
+                Passo Direito (👉) 🦶
+            </button>
+        </div>
+        <p class="text-[10px] text-center text-slate-400 mt-2">Dica: Aperte quando a barra rosa estiver no centro!</p>
+    </div>
+
     <div id="speech-bubbles-container" class="absolute inset-0 pointer-events-none z-20"></div>
 
-    <!-- Modal Transition Phase 1 -> Phase 2 -->
+    <!-- Phase 2 Modal -->
     <div id="phase2-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md hidden transition-opacity duration-500 opacity-0">
         <div class="glass-panel max-w-md w-11/12 p-6 rounded-3xl text-center border-2 border-emerald-400/60 shadow-2xl transform scale-95 transition-transform duration-300">
             <div class="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-400 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">
@@ -248,13 +296,51 @@ ra);
             </div>
             <h2 class="text-2xl font-bold text-emerald-300 mb-2">100% de Cuidados Alcançados!</h2>
             <p class="text-sm text-slate-300 mb-4 leading-relaxed">
-                Com o carinho e dedicação do Caio, Tayane fortaleceu o corpo e está pronta para ir ao consultório médico!
+                Com o carinho e dedicação do Victor, Tayane fortaleceu o corpo e está pronta para ir ao consultório médico!
             </p>
             <div class="bg-red-950/60 p-3 rounded-xl border border-red-500/40 mb-6 text-xs text-red-200 font-semibold">
                 ⚠️ ALERTA FASE 2: Zumbis surgiram na cidade! Leve a Tayane na cadeira de rodas em segurança até o hospital e elimine as ameaças!
             </div>
             <button onclick="startPhase2()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-black text-sm rounded-xl shadow-lg hover:brightness-110 transition-all uppercase tracking-wide">
                 Iniciar Fase 2: Ida ao Médico
+            </button>
+        </div>
+    </div>
+
+    <!-- Phase 3 Victory Modal -->
+    <div id="victory-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md hidden opacity-0 transition-opacity duration-500">
+        <div class="glass-panel max-w-md w-11/12 p-6 rounded-3xl text-center border-2 border-emerald-400 shadow-2xl">
+            <div class="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-400 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">
+                🎉
+            </div>
+            <h2 class="text-2xl font-bold text-emerald-300 mb-2">Chegaram em Segurança ao Médico!</h2>
+            <p class="text-sm text-slate-300 mb-4 leading-relaxed">
+                O médico fez a avaliação e entregou um **Andador Ortopédico** para a reabilitação física da Tayane!
+            </p>
+            <div class="bg-emerald-950/60 p-3 rounded-xl border border-emerald-500/40 mb-6 text-xs text-emerald-200 font-semibold">
+                🚶🏻‍♀️ FASE 3: Ajude a Tayane a dar seus primeiros passos com o andador mantendo o ritmo certo!
+            </div>
+            <button onclick="startPhase3()" class="w-full py-3.5 bg-gradient-to-r from-pink-500 via-purple-500 to-emerald-400 font-black text-slate-950 uppercase tracking-wide rounded-xl shadow-lg hover:brightness-110 transition-all">
+                Iniciar Fase 3: Treino com Andador
+            </button>
+        </div>
+    </div>
+
+    <!-- Final Victory Modal -->
+    <div id="final-victory-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md hidden opacity-0 transition-opacity duration-500">
+        <div class="glass-panel max-w-md w-11/12 p-6 rounded-3xl text-center border-2 border-pink-400 shadow-2xl">
+            <div class="w-20 h-20 bg-pink-500/20 border-2 border-pink-400 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">
+                🏆
+            </div>
+            <h2 class="text-2xl font-bold text-pink-300 mb-2">Tayane Voltou a Andar!</h2>
+            <p class="text-sm text-slate-300 mb-4 leading-relaxed">
+                Graças ao cuidado incansável e amor do Victor, Tayane superou todas as adversidades e conseguiu caminhar perfeitamente!
+            </p>
+            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mb-6 text-xs text-amber-300 font-semibold">
+                🌟 Parabéns! Você concluiu com sucesso todas as 3 fases do jogo!
+            </div>
+            <button onclick="resetGameTotal()" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 font-bold text-white rounded-xl shadow-lg hover:brightness-110 transition-all">
+                Jogar História Novamente
             </button>
         </div>
     </div>
@@ -267,29 +353,10 @@ ra);
             </div>
             <h2 class="text-2xl font-bold text-red-400 mb-2">Os Zumbis Atacaram!</h2>
             <p class="text-sm text-slate-300 mb-6">
-                Caio e Tayane não conseguiram chegar a tempo ao médico. Tente defender com mais agilidade!
+                Victor e Tayane não conseguiram chegar a tempo ao médico. Tente defender com mais agilidade!
             </p>
             <button onclick="startPhase2()" class="w-full py-3 bg-red-600 hover:bg-red-500 font-bold rounded-xl text-white transition-all">
                 Tentar Fase 2 Novamente
-            </button>
-        </div>
-    </div>
-
-    <!-- Victory Modal -->
-    <div id="victory-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md hidden opacity-0 transition-opacity duration-500">
-        <div class="glass-panel max-w-md w-11/12 p-6 rounded-3xl text-center border-2 border-emerald-400 shadow-2xl">
-            <div class="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-400 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">
-                🎉
-            </div>
-            <h2 class="text-2xl font-bold text-emerald-300 mb-2">Chegaram em Segurança ao Médico!</h2>
-            <p class="text-sm text-slate-300 mb-4 leading-relaxed">
-                Caio defendeu a Tayane dos zumbis na cidade e a levou com sucesso ao hospital! A consulta foi realizada e ela continuará sua plena recuperação!
-            </p>
-            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mb-6 text-xs text-amber-300 font-semibold">
-                🏆 Parabéns! Você completou a Fase 1 e a Fase 2 da história!
-            </div>
-            <button onclick="resetGameTotal()" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 font-bold text-white rounded-xl shadow-lg hover:brightness-110 transition-all">
-                Jogar História Novamente
             </button>
         </div>
     </div>
@@ -299,75 +366,81 @@ ra);
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
-        // --- STREAMING_CHUNK:Initializing 3D Scene & Render Setup... ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x0f172a);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(12, 12, 14);
+        
+        const isMobile = window.innerWidth < 640;
+        if (isMobile) {
+            camera.position.set(12, 12, 14);
+        } else {
+            camera.position.set(10, 10, 12);
+        }
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         container.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        const fillLight = new THREE.PointLight(0xec4899, 0.5, 20);
+        fillLight.position.set(-5, 5, -5);
+        scene.add(fillLight);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.maxPolarAngle = Math.PI / 2.1;
         controls.minDistance = 6;
-        controls.maxDistance = 30;
+        controls.maxDistance = 35;
         controls.target.set(0, 1, 0);
 
-        // --- LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-        scene.add(ambientLight);
-
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-        dirLight.position.set(12, 18, 10);
-        dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 2048;
-        dirLight.shadow.mapSize.height = 2048;
-        scene.add(dirLight);
-
-        // --- MATERIALS ---
         const mats = {
-            floorBedroom: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 }),
-            floorLiving: new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.6 }),
-            floorKitchen: new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.2 }),
-            floorBath: new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1 }),
-            road: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }),
-            sidewalk: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 }),
-            wood: new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.7 }),
-            woodDark: new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.8 }),
-            bedSheet: new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.5 }),
-            pillow: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }),
-            sofa: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 }),
-            skin: new THREE.MeshStandardMaterial({ color: 0xfed7aa, roughness: 0.6 }),
-            skinZombie: new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.7 }),
-            hairCaio: new THREE.MeshStandardMaterial({ color: 0x292524, roughness: 0.9 }),
-            hairTayane: new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 }),
-            clothesCaio: new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.7 }),
-            clothesPants: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }),
-            clothesTayane: new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.7 }),
-            bandage: new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.5 }),
-            metal: new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7, roughness: 0.3 }),
-            hospital: new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.3 }),
-            tvScreen: new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.3 })
+            floorBedroom: new THREE.MeshStandardMaterial({ color: 0x382319, roughness: 0.8 }),
+            floorLiving: new THREE.MeshStandardMaterial({ color: 0x4a3425, roughness: 0.7 }),
+            floorKitchen: new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 }),
+            floorBath: new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.4 }),
+            wood: new THREE.MeshStandardMaterial({ color: 0x854d0e }),
+            woodDark: new THREE.MeshStandardMaterial({ color: 0x451a03 }),
+            bedSheet: new THREE.MeshStandardMaterial({ color: 0xf472b6 }),
+            pillow: new THREE.MeshStandardMaterial({ color: 0xffffff }),
+            sofa: new THREE.MeshStandardMaterial({ color: 0x0284c7 }),
+            metal: new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 }),
+            tvScreen: new THREE.MeshBasicMaterial({ color: 0x0f172a }),
+            skin: new THREE.MeshStandardMaterial({ color: 0xfde047 }),
+            skinZombie: new THREE.MeshStandardMaterial({ color: 0x15803d }),
+            hairVictor: new THREE.MeshStandardMaterial({ color: 0x451a03 }),
+            hairTayane: new THREE.MeshStandardMaterial({ color: 0x7c2d12 }),
+            clothesVictor: new THREE.MeshStandardMaterial({ color: 0x2563eb }),
+            clothesTayane: new THREE.MeshStandardMaterial({ color: 0xec4899 }),
+            clothesPants: new THREE.MeshStandardMaterial({ color: 0x334155 }),
+            bandage: new THREE.MeshStandardMaterial({ color: 0xf1f5f9 }),
+            road: new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 }),
+            sidewalk: new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 }),
+            hospital: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 })
         };
 
-        // --- GROUPS ---
         const phase1Group = new THREE.Group();
         const phase2Group = new THREE.Group();
+        const phase3Group = new THREE.Group();
         scene.add(phase1Group);
         scene.add(phase2Group);
+        scene.add(phase3Group);
         phase2Group.visible = false;
+        phase3Group.visible = false;
 
-        // --- STREAMING_CHUNK:Constructing Phase 1 Apartment Furniture... ---
-        // Floor Tiles (Sem Paredes)
+        // --- STREAMING_CHUNK:Modelos 3D de Edifícios, Apartamentos e Cidades... ---
         function createFloorTile(w, d, x, z, mat) {
             const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, 0.2, d), mat);
             mesh.position.set(x, -0.1, z);
@@ -379,7 +452,6 @@ ra);
         createFloorTile(4.5, 4.5, -2.25, 2.25, mats.floorKitchen);
         createFloorTile(4.5, 4.5, 2.25, 2.25, mats.floorBath);
 
-        // Furniture (Sem paredes para visualização aberta de corte)
         const bedGroup = new THREE.Group();
         const bedFrame = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.5, 1.5), mats.wood);
         bedGroup.add(bedFrame);
@@ -416,8 +488,7 @@ ra);
         tv.position.set(2.2, 1.05, -1.0);
         phase1Group.add(tv);
 
-        // --- STREAMING_CHUNK:Constructing Phase 2 City & Hospital Scene... ---
-        // Road & Sidewalk
+        // Passo 2 - Cidade
         const road = new THREE.Mesh(new THREE.BoxGeometry(30, 0.2, 8), mats.road);
         road.position.set(0, -0.1, 0);
         phase2Group.add(road);
@@ -426,7 +497,6 @@ ra);
         sidewalk.position.set(0, -0.05, -5.5);
         phase2Group.add(sidewalk);
 
-        // Hospital Building at the far end
         const hospitalBuilding = new THREE.Group();
         const hospMain = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 5), mats.hospital);
         hospMain.position.set(12, 3, -5.5);
@@ -439,37 +509,77 @@ ra);
         const hospCrossVert = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.8, 0.1), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
         hospCrossVert.position.set(12, 4.5, -2.9);
         hospitalBuilding.add(hospCrossVert);
-
         phase2Group.add(hospitalBuilding);
 
-        // --- STREAMING_CHUNK:Creating Characters (Caio, Tayane, Wheelchair, Zombies)... ---
+        // Phase 3 Track
+        const rehabFloor = new THREE.Mesh(new THREE.BoxGeometry(20, 0.2, 10), new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 }));
+        rehabFloor.position.set(0, -0.1, 0);
+        phase3Group.add(rehabFloor);
+
+        const track = new THREE.Mesh(new THREE.BoxGeometry(16, 0.22, 2.5), new THREE.MeshStandardMaterial({ color: 0x38bdf8 }));
+        track.position.set(0, -0.08, 0);
+        phase3Group.add(track);
+
+        function createWalkerModel() {
+            const walkerGroup = new THREE.Group();
+            const aluminumMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.1 });
+            const rubberGripMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+
+            const legGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.8, 12);
+            const positions = [
+                [-0.3, 0.4, -0.25],
+                [0.3, 0.4, -0.25],
+                [-0.3, 0.4, 0.25],
+                [0.3, 0.4, 0.25]
+            ];
+            positions.forEach(pos => {
+                const leg = new THREE.Mesh(legGeo, aluminumMat);
+                leg.position.set(...pos);
+                walkerGroup.add(leg);
+            });
+
+            const topBarHoriz = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.6, 12), aluminumMat);
+            topBarHoriz.rotation.z = Math.PI / 2;
+            topBarHoriz.position.set(0, 0.8, -0.25);
+            walkerGroup.add(topBarHoriz);
+
+            const handleL = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 12), rubberGripMat);
+            handleL.rotation.x = Math.PI / 2;
+            handleL.position.set(-0.3, 0.8, 0);
+            walkerGroup.add(handleL);
+
+            const handleR = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 12), rubberGripMat);
+            handleR.rotation.x = Math.PI / 2;
+            handleR.position.set(0.3, 0.8, 0);
+            walkerGroup.add(handleR);
+
+            return walkerGroup;
+        }
+
+        // --- STREAMING_CHUNK:Construindo Personagens Humanos... ---
         function createHumanoidModel(isTayane = false, isZombie = false) {
             const group = new THREE.Group();
 
-            // Head
             const headMat = isZombie ? mats.skinZombie : mats.skin;
             const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), headMat);
             head.position.y = 1.35;
             group.add(head);
 
-            // Hair
             if (!isZombie) {
-                const hairMat = isTayane ? mats.hairTayane : mats.hairCaio;
+                const hairMat = isTayane ? mats.hairTayane : mats.hairVictor;
                 const hair = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), hairMat);
                 hair.position.set(0, 1.38, -0.02);
                 hair.scale.set(1.02, 0.95, 1.02);
                 group.add(hair);
             }
 
-            // Torso
-            let clothesMat = isTayane ? mats.clothesTayane : mats.clothesCaio;
+            let clothesMat = isTayane ? mats.clothesTayane : mats.clothesVictor;
             if (isZombie) clothesMat = mats.clothesPants;
 
             const torso = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.5, 0.22), clothesMat);
             torso.position.y = 0.95;
             group.add(torso);
 
-            // Arms & Legs
             const armL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.42, 0.12), clothesMat);
             armL.position.set(-0.27, 0.92, 0);
             group.add(armL);
@@ -495,18 +605,16 @@ ra);
             return { group, head, torso, armL, armR, legL, legR };
         }
 
-        // Phase 1 Characters
         const tayaneBed = createHumanoidModel(true, false);
         tayaneBed.group.rotation.x = -Math.PI / 2;
         tayaneBed.group.rotation.z = Math.PI / 2;
         tayaneBed.group.position.set(-2.8, 0.65, -3.2);
         phase1Group.add(tayaneBed.group);
 
-        const caio = createHumanoidModel(false, false);
-        caio.group.position.set(1.5, 0, -2.5);
-        phase1Group.add(caio.group);
+        const victor = createHumanoidModel(false, false);
+        victor.group.position.set(1.5, 0, -2.5);
+        phase1Group.add(victor.group);
 
-        // Phase 2 Wheelchair + Group
         const phase2PartyGroup = new THREE.Group();
         const wheelchair = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.8), mats.metal);
         wheelchair.position.set(0, 0.4, 0);
@@ -516,14 +624,29 @@ ra);
         tayaneChair.group.position.set(0, 0.2, 0);
         phase2PartyGroup.add(tayaneChair.group);
 
-        const caioPusher = createHumanoidModel(false, false);
-        caioPusher.group.position.set(-0.7, 0, 0);
-        phase2PartyGroup.add(caioPusher.group);
+        const victorPusher = createHumanoidModel(false, false);
+        victorPusher.group.position.set(-0.7, 0, 0);
+        phase2PartyGroup.add(victorPusher.group);
 
         phase2Group.add(phase2PartyGroup);
         phase2PartyGroup.position.set(-10, 0, 0);
 
-        // Zombies List
+        const phase3PartyGroup = new THREE.Group();
+        const walker3D = createWalkerModel();
+        walker3D.position.set(0, 0, 0.3);
+        phase3PartyGroup.add(walker3D);
+
+        const tayaneWalker = createHumanoidModel(true, false);
+        tayaneWalker.group.position.set(0, 0, 0);
+        phase3PartyGroup.add(tayaneWalker.group);
+
+        const victorSupport = createHumanoidModel(false, false);
+        victorSupport.group.position.set(-0.7, 0, -0.3);
+        phase3PartyGroup.add(victorSupport.group);
+
+        phase3Group.add(phase3PartyGroup);
+        phase3PartyGroup.position.set(-6, 0, 0);
+
         const zombies = [];
 
         function spawnZombie() {
@@ -533,7 +656,7 @@ ra);
             zombies.push(z);
         }
 
-        // --- GAME STATES & LOCATIONS ---
+        // --- STREAMING_CHUNK:Definindo a lógica do jogo, atualizações de estado e animações... ---
         const LOCATIONS = {
             cama: new THREE.Vector3(-2.2, 0, -3.2),
             cozinha: new THREE.Vector3(-2.5, 0, 2.0),
@@ -557,213 +680,162 @@ ra);
             pontos: 0
         };
 
-        let isActionInProgress = false;
+        let phase3State = {
+            passos: 0,
+            metaPassos: 20,
+            partyX: -6,
+            nextExpectedStep: 'left',
+            rhythmPos: 0,
+            rhythmDir: 1
+        };
 
-        // --- STREAMING_CHUNK:Phase 1 Logic & Interactions... ---
-        function triggerAction(actionType) {
+        let isActionInProgress = false;
+        let isWalking = false;
+        let walkTarget = null;
+        let activeActionType = null;
+
+        function triggerAction(action) {
             if (isActionInProgress || currentPhase !== 1) return;
             isActionInProgress = true;
-            setButtonsDisabled(true);
+            activeActionType = action;
 
-            const msgBox = document.getElementById('narrative-box');
+            let targetPos = LOCATIONS.cama;
+            if (action === 'comida') targetPos = LOCATIONS.cozinha;
+            if (action === 'remedio' || action === 'curativo') targetPos = LOCATIONS.armario;
+            if (action === 'companhia') targetPos = LOCATIONS.sala;
 
-            if (actionType === 'comida') {
-                msgBox.innerText = "Caio vai até a cozinha preparar comida para Tayane...";
-                walkActorTo(LOCATIONS.cozinha, () => {
-                    spawnFloatingEmoji("🥗", caio.group.position);
-                    setTimeout(() => {
-                        walkActorTo(LOCATIONS.cama, () => {
-                            spawnFloatingEmoji("😋", tayaneBed.group.position);
-                            status.fome = Math.min(100, status.fome + 30);
-                            status.companhia = Math.min(100, status.companhia + 5);
-                            addProgress(12);
-                            finishAction("Tayane adorou a refeição feita pelo Caio!");
-                        });
-                    }, 600);
-                });
-
-            } else if (actionType === 'remedio') {
-                msgBox.innerText = "Caio busca os analgésicos no armário...";
-                walkActorTo(LOCATIONS.armario, () => {
-                    spawnFloatingEmoji("💊", caio.group.position);
-                    setTimeout(() => {
-                        walkActorTo(LOCATIONS.cama, () => {
-                            spawnFloatingEmoji("✨", tayaneBed.group.position);
-                            status.remedio = Math.min(100, status.remedio + 35);
-                            addProgress(15);
-                            finishAction("Caio deu o remédio para Tayane. A dor diminuiu!");
-                        });
-                    }, 600);
-                });
-
-            } else if (actionType === 'curativo') {
-                msgBox.innerText = "Caio pega o kit de curativos...";
-                walkActorTo(LOCATIONS.armario, () => {
-                    spawnFloatingEmoji("🩹", caio.group.position);
-                    setTimeout(() => {
-                        walkActorTo(LOCATIONS.cama, () => {
-                            spawnFloatingEmoji("💖", tayaneBed.group.position);
-                            status.curativo = Math.min(100, status.curativo + 40);
-                            addProgress(15);
-                            finishAction("Caio trocou os curativos da Tayane com carinho!");
-                        });
-                    }, 600);
-                });
-
-            } else if (actionType === 'companhia') {
-                msgBox.innerText = "Caio senta ao lado de Tayane para conversar...";
-                walkActorTo(LOCATIONS.cama, () => {
-                    spawnFloatingEmoji("💬", caio.group.position);
-                    spawnFloatingEmoji("❤️", tayaneBed.group.position);
-                    status.companhia = Math.min(100, status.companhia + 35);
-                    addProgress(10);
-                    finishAction("Caio e Tayane conversaram e deram risadas!");
-                });
-
-            } else if (actionType === 'exercicio') {
-                if (status.fome < 40 || status.remedio < 40) {
-                    msgBox.innerText = "⚠️ Tayane precisa comer e tomar remédio antes do exercício!";
-                    spawnFloatingEmoji("😣", tayaneBed.group.position);
-                    isActionInProgress = false;
-                    setButtonsDisabled(false);
-                    return;
-                }
-
-                msgBox.innerText = "Caio ajuda Tayane no treino de reabilitação...";
-                walkActorTo(LOCATIONS.cama, () => {
-                    spawnFloatingEmoji("🏋️", tayaneBed.group.position);
-                    status.fome = Math.max(0, status.fome - 10);
-                    addProgress(25);
-                    finishAction("Ótimo treino! O corpo de Tayane está se fortalecendo rapidamente!");
-                });
-            }
+            walkTarget = targetPos;
+            isWalking = true;
         }
 
-        function addProgress(amount) {
-            status.progressoGeral = Math.min(100, status.progressoGeral + amount);
-            updateHUD();
-            if (status.progressoGeral >= 100) {
-                setTimeout(showPhase2Modal, 800);
-            }
-        }
+        function executeCareAction() {
+            let gains = { fome: 0, remedio: 0, curativo: 0, companhia: 0 };
+            let textMsg = "";
 
-        function finishAction(messageText) {
-            document.getElementById('narrative-box').innerText = messageText;
+            if (activeActionType === 'comida') {
+                gains.fome = 20;
+                textMsg = "🥣 Victor preparou uma sopa quente!";
+            } else if (activeActionType === 'remedio') {
+                gains.remedio = 25;
+                textMsg = "💊 Remédio para dor entregue com água!";
+            } else if (activeActionType === 'curativo') {
+                gains.curativo = 25;
+                textMsg = "🩹 Curativo trocado cuidadosamente!";
+            } else if (activeActionType === 'companhia') {
+                gains.companhia = 20;
+                textMsg = "💬 Conversaram e deram risadas juntos!";
+            } else if (activeActionType === 'exercicio') {
+                gains.fome = -5;
+                gains.remedio = 10;
+                gains.curativo = 10;
+                gains.companhia = 15;
+                textMsg = "🏋️ Exercício leve de fisioterapia!";
+            }
+
+            status.fome = Math.min(100, Math.max(0, status.fome + gains.fome));
+            status.remedio = Math.min(100, Math.max(0, status.remedio + gains.remedio));
+            status.curativo = Math.min(100, Math.max(0, status.curativo + gains.curativo));
+            status.companhia = Math.min(100, Math.max(0, status.companhia + gains.companhia));
+
+            spawnFloatingEmoji("💖", tayaneBed.group.position);
             updateHUD();
+
+            document.getElementById('narrative-box').innerText = textMsg;
+
             setTimeout(() => {
                 isActionInProgress = false;
-                setButtonsDisabled(false);
-            }, 400);
-        }
-
-        function setButtonsDisabled(disabled) {
-            const btns = document.querySelectorAll('.sims-btn');
-            btns.forEach(b => {
-                b.disabled = disabled;
-                b.style.opacity = disabled ? '0.5' : '1';
-            });
+                if (status.progressoGeral >= 100) {
+                    showPhase2Modal();
+                }
+            }, 1000);
         }
 
         function updateHUD() {
+            status.progressoGeral = Math.round((status.fome + status.remedio + status.curativo + status.companhia) / 4);
+
             document.getElementById('fill-fome').style.width = status.fome + '%';
-            document.getElementById('txt-fome').innerText = Math.round(status.fome) + '%';
+            document.getElementById('txt-fome').innerText = status.fome + '%';
 
             document.getElementById('fill-remedio').style.width = status.remedio + '%';
-            document.getElementById('txt-remedio').innerText = Math.round(status.remedio) + '%';
+            document.getElementById('txt-remedio').innerText = status.remedio + '%';
 
             document.getElementById('fill-curativo').style.width = status.curativo + '%';
-            document.getElementById('txt-curativo').innerText = Math.round(status.curativo) + '%';
+            document.getElementById('txt-curativo').innerText = status.curativo + '%';
 
             document.getElementById('fill-companhia').style.width = status.companhia + '%';
-            document.getElementById('txt-companhia').innerText = Math.round(status.companhia) + '%';
+            document.getElementById('txt-companhia').innerText = status.companhia + '%';
 
             document.getElementById('fill-progresso-geral').style.width = status.progressoGeral + '%';
-            document.getElementById('txt-progresso-geral').innerText = Math.round(status.progressoGeral) + '%';
+            document.getElementById('txt-progresso-geral').innerText = status.progressoGeral + '%';
         }
 
         function showPhase2Modal() {
             const modal = document.getElementById('phase2-modal');
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modal.children[0].classList.remove('scale-95');
-            }, 50);
+            setTimeout(() => modal.classList.remove('opacity-0'), 50);
         }
 
-        // --- STREAMING_CHUNK:Phase 2 Logic & Zombie Combat... ---
         function startPhase2() {
             currentPhase = 2;
             document.getElementById('phase2-modal').classList.add('hidden');
+            document.getElementById('gameover-modal').classList.add('hidden');
             document.getElementById('hud-phase1').classList.add('hidden');
             document.getElementById('controls-phase1').classList.add('hidden');
 
             document.getElementById('hud-phase2').classList.remove('hidden');
             document.getElementById('controls-phase2').classList.remove('hidden');
 
-            document.getElementById('phase-title').innerHTML = `<span>♿</span> Fase 2: Ida ao Médico com Tayane`;
-            document.getElementById('narrative-title').innerHTML = `<span>🏙️</span> Cidade Perigosa`;
-            document.getElementById('narrative-box').innerText = "Conduza a cadeira de rodas e elimine os zumbis para chegar com segurança ao hospital!";
+            document.getElementById('phase-title').innerHTML = `<span>♿</span> Fase 2: Caminho do Hospital`;
+            document.getElementById('narrative-title').innerHTML = `<span>🏙️</span> Ruas Perigosas`;
+            document.getElementById('narrative-box').innerText = "Avance a cadeira de rodas com Tayane e use o botão Atacar para destruir os Zumbis que se aproximarem!";
 
             phase1Group.visible = false;
             phase2Group.visible = true;
 
-            camera.position.set(0, 8, 14);
+            camera.position.set(0, 6, 12);
             controls.target.set(0, 1, 0);
 
-            phase2State = { partyX: -10, vida: 100, zumbisDerrotados: 0, pontos: 0 };
-            updatePhase2HUD();
+            phase2State.partyX = -10;
+            phase2State.vida = 100;
+            phase2State.zumbisDerrotados = 0;
+            phase2State.pontos = 0;
+            phase2PartyGroup.position.x = phase2State.partyX;
 
-            // Clear old zombies & spawn initial wave
             zombies.forEach(z => phase2Group.remove(z.group));
             zombies.length = 0;
 
-            for (let i = 0; i < 4; i++) spawnZombie();
+            for (let i = 0; i < 3; i++) spawnZombie();
+            updatePhase2HUD();
         }
 
-        function moveWheelchair(dir) {
+        function moveWheelchair(dist) {
             if (currentPhase !== 2) return;
-            phase2State.partyX = Math.min(10, Math.max(-11, phase2State.partyX + dir));
+            phase2State.partyX += dist;
+            phase2State.partyX = Math.max(-12, Math.min(10, phase2State.partyX));
             phase2PartyGroup.position.x = phase2State.partyX;
 
-            // Update overall progress bar in phase 2 based on distance to hospital
-            const distProgress = Math.min(100, Math.max(0, ((phase2State.partyX + 11) / 21) * 100));
-            document.getElementById('fill-progresso-geral').style.width = distProgress + '%';
-            document.getElementById('txt-progresso-geral').innerText = Math.round(distProgress) + '%';
-
             if (phase2State.partyX >= 9.5) {
-                // Reached hospital! Victory!
                 showVictoryModal();
             }
         }
 
-        function caioAttackZombie() {
-            if (currentPhase !== 2 || zombies.length === 0) return;
+        function victorAttackZombie() {
+            if (currentPhase !== 2) return;
+            victorPusher.armR.rotation.x = -Math.PI / 2;
+            setTimeout(() => victorPusher.armR.rotation.x = 0, 300);
 
-            // Attack nearest zombie
-            let nearestIndex = 0;
-            let minDist = 999;
-            zombies.forEach((z, idx) => {
-                const dist = Math.abs(z.group.position.x - phase2State.partyX);
-                if (dist < minDist) {
-                    minDist = dist;
-                    nearestIndex = idx;
+            for (let i = zombies.length - 1; i >= 0; i--) {
+                const z = zombies[i];
+                if (Math.abs(z.group.position.x - phase2State.partyX) < 3.2) {
+                    spawnFloatingEmoji("💥", z.group.position);
+                    phase2Group.remove(z.group);
+                    zombies.splice(i, 1);
+                    phase2State.zumbisDerrotados++;
+                    phase2State.pontos += 100;
+                    spawnZombie();
+                    updatePhase2HUD();
+                    break;
                 }
-            });
-
-            if (minDist < 4.5) {
-                const z = zombies[nearestIndex];
-                spawnFloatingEmoji("💥", z.group.position);
-                phase2Group.remove(z.group);
-                zombies.splice(nearestIndex, 1);
-
-                phase2State.zumbisDerrotados++;
-                phase2State.pontos += 100;
-                updatePhase2HUD();
-
-                // Spawn replacements
-                if (zombies.length < 3) spawnZombie();
-            } else {
-                spawnFloatingEmoji("💨", caioPusher.group.position);
             }
         }
 
@@ -773,6 +845,109 @@ ra);
             document.getElementById('txt-zumbis-derrotados').innerText = phase2State.zumbisDerrotados;
             document.getElementById('txt-pontos-p2').innerText = phase2State.pontos;
         }
+
+        function startPhase3() {
+            currentPhase = 3;
+            document.getElementById('victory-modal').classList.add('hidden');
+            document.getElementById('hud-phase2').classList.add('hidden');
+            document.getElementById('controls-phase2').classList.add('hidden');
+
+            document.getElementById('hud-phase3').classList.remove('hidden');
+            document.getElementById('controls-phase3').classList.remove('hidden');
+
+            document.getElementById('phase-title').innerHTML = `<span>🚶🏻‍♀️</span> Fase 3: Reabilitação com Andador`;
+            document.getElementById('narrative-title').innerHTML = `<span>🏥</span> Clínica de Fisioterapia`;
+            document.getElementById('narrative-box').innerText = "Ajude Tayane a dar passos firmes no ritmo certo! Aperte Esquerda ou Direita quando o marcador estiver no centro!";
+
+            phase2Group.visible = false;
+            phase3Group.visible = true;
+
+            camera.position.set(0, 5, 8);
+            controls.target.set(0, 1, 0);
+
+            phase3State.passos = 0;
+            phase3State.partyX = -6;
+            phase3PartyGroup.position.x = phase3State.partyX;
+            updatePhase3HUD();
+        }
+
+        function stepRhythm(side) {
+            if (currentPhase !== 3) return;
+
+            const feedbackTxt = document.getElementById('txt-rhythm-feedback');
+            const pos = phase3State.rhythmPos;
+            const inPerfectZone = pos >= 42 && pos <= 58;
+            const inGoodZone = pos >= 30 && pos <= 70;
+
+            if (side !== phase3State.nextExpectedStep) {
+                feedbackTxt.innerText = "❌ Pé incorreto! Alterne o passo.";
+                feedbackTxt.className = "text-sm font-extrabold text-red-400 animate-pulse";
+                spawnFloatingEmoji("⚠️", tayaneWalker.group.position);
+                return;
+            }
+
+            if (inPerfectZone) {
+                feedbackTxt.innerText = "🌟 PERFEITO! Passo Firme!";
+                feedbackTxt.className = "text-sm font-extrabold text-emerald-400";
+                spawnFloatingEmoji("✨", tayaneWalker.group.position);
+                advanceStepProgress(1);
+                phase3State.nextExpectedStep = side === 'left' ? 'right' : 'left';
+            } else if (inGoodZone) {
+                feedbackTxt.innerText = "👍 BOM! Continue assim.";
+                feedbackTxt.className = "text-sm font-extrabold text-amber-300";
+                spawnFloatingEmoji("👍", tayaneWalker.group.position);
+                advanceStepProgress(1);
+                phase3State.nextExpectedStep = side === 'left' ? 'right' : 'left';
+            } else {
+                feedbackTxt.innerText = "⚡ FORA DO RITMO! Tente sincronizar!";
+                feedbackTxt.className = "text-sm font-extrabold text-orange-400";
+                spawnFloatingEmoji("😅", tayaneWalker.group.position);
+            }
+        }
+
+        function advanceStepProgress(amount) {
+            phase3State.passos = Math.min(phase3State.metaPassos, phase3State.passos + amount);
+            phase3State.partyX = -6 + (phase3State.passos / phase3State.metaPassos) * 12;
+            phase3PartyGroup.position.x = phase3State.partyX;
+
+            if (phase3State.nextExpectedStep === 'left') {
+                tayaneWalker.legL.rotation.x = 0.35;
+                tayaneWalker.legR.rotation.x = -0.35;
+            } else {
+                tayaneWalker.legL.rotation.x = -0.35;
+                tayaneWalker.legR.rotation.x = 0.35;
+            }
+
+            updatePhase3HUD();
+
+            if (phase3State.passos >= phase3State.metaPassos) {
+                setTimeout(showFinalVictoryModal, 600);
+            }
+        }
+
+        function updatePhase3HUD() {
+            const pct = (phase3State.passos / phase3State.metaPassos) * 100;
+            document.getElementById('fill-passos-p3').style.width = pct + '%';
+            document.getElementById('txt-passos-p3').innerText = `${phase3State.passos} / ${phase3State.metaPassos}`;
+            document.getElementById('fill-progresso-geral').style.width = pct + '%';
+            document.getElementById('txt-progresso-geral').innerText = Math.round(pct) + '%';
+        }
+
+        function showFinalVictoryModal() {
+            const modal = document.getElementById('final-victory-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 50);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (currentPhase === 3) {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                    stepRhythm('left');
+                } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                    stepRhythm('right');
+                }
+            }
+        });
 
         function showVictoryModal() {
             const modal = document.getElementById('victory-modal');
@@ -790,100 +965,75 @@ ra);
             location.reload();
         }
 
-        // --- MOVEMENT ENGINE ---
-        let isWalking = false;
-        let walkTarget = null;
-        let walkCallback = null;
-        let walkTime = 0;
-
-        function walkActorTo(targetVec, onArrival) {
-            walkTarget = targetVec.clone();
-            walkCallback = onArrival;
-            isWalking = true;
-            const dir = targetVec.clone().sub(caio.group.position);
-            caio.group.rotation.y = Math.atan2(dir.x, dir.z);
-        }
-
-        function spawnFloatingEmoji(emojiText, posVec) {
-            const container = document.getElementById('speech-bubbles-container');
+        function spawnFloatingEmoji(text, worldPos) {
             const el = document.createElement('div');
-            el.className = 'absolute text-2xl font-bold floating-bubble pointer-events-none drop-shadow-md';
-            el.innerText = emojiText;
+            el.className = 'absolute text-2xl font-bold floating-bubble pointer-events-none z-30';
+            el.innerText = text;
 
-            const tempV = posVec.clone().add(new THREE.Vector3(0, 1.8, 0));
-            tempV.project(camera);
-
-            const x = (tempV.x * .5 + .5) * window.innerWidth;
-            const y = (-(tempV.y * .5) + .5) * window.innerHeight;
+            const proj = worldPos.clone().project(camera);
+            const x = (proj.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-(proj.y * 0.5) + 0.5) * window.innerHeight;
 
             el.style.left = `${x}px`;
             el.style.top = `${y}px`;
 
-            container.appendChild(el);
-            setTimeout(() => el.remove(), 2400);
+            document.getElementById('speech-bubbles-container').appendChild(el);
+            setTimeout(() => el.remove(), 2500);
         }
 
-        // Decay timer for Phase 1
-        setInterval(() => {
-            if (currentPhase === 1 && !isActionInProgress && status.progressoGeral < 100) {
-                status.fome = Math.max(0, status.fome - 1.0);
-                status.remedio = Math.max(0, status.remedio - 1.2);
-                status.curativo = Math.max(0, status.curativo - 0.7);
-                status.companhia = Math.max(0, status.companhia - 0.8);
-                updateHUD();
-            }
-        }, 3500);
-
-        // --- ANIMATION LOOP ---
-        const clock = new THREE.Clock();
+        // --- STREAMING_CHUNK:Loop de animação de renderização principal... ---
+        let clock = new THREE.Clock();
 
         function animate() {
             requestAnimationFrame(animate);
-
             const delta = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
 
             if (currentPhase === 1) {
                 if (isWalking && walkTarget) {
-                    const currentPos = caio.group.position;
-                    const dist = currentPos.distanceTo(walkTarget);
+                    const dir = new THREE.Vector3().subVectors(walkTarget, victor.group.position);
+                    dir.y = 0;
+                    if (dir.length() > 0.1) {
+                        dir.normalize();
+                        victor.group.position.addScaledVector(dir, delta * 3.5);
+                        victor.group.rotation.y = Math.atan2(dir.x, dir.z);
 
-                    if (dist > 0.2) {
-                        currentPos.lerp(walkTarget, delta * 3.5);
-                        walkTime += delta * 12;
-                        caio.legL.rotation.x = Math.sin(walkTime) * 0.6;
-                        caio.legR.rotation.x = -Math.sin(walkTime) * 0.6;
-                        caio.armL.rotation.x = -Math.sin(walkTime) * 0.5;
-                        caio.armR.rotation.x = Math.sin(walkTime) * 0.5;
+                        victor.legL.rotation.x = Math.sin(elapsedTime * 12) * 0.5;
+                        victor.legR.rotation.x = -Math.sin(elapsedTime * 12) * 0.5;
                     } else {
                         isWalking = false;
-                        caio.legL.rotation.x = 0;
-                        caio.legR.rotation.x = 0;
-                        caio.armL.rotation.x = 0;
-                        caio.armR.rotation.x = 0;
-                        if (walkCallback) {
-                            const cb = walkCallback;
-                            walkCallback = null;
-                            cb();
-                        }
+                        victor.legL.rotation.x = 0;
+                        victor.legR.rotation.x = 0;
+                        executeCareAction();
                     }
                 }
             } else if (currentPhase === 2) {
-                // Move zombies towards wheelchair
                 zombies.forEach(z => {
                     if (z.group.position.x > phase2State.partyX + 0.8) {
-                        z.group.position.x -= delta * 0.8;
-                        z.legL.rotation.x = Math.sin(elapsedTime * 8) * 0.5;
-                        z.legR.rotation.x = -Math.sin(elapsedTime * 8) * 0.5;
+                        z.group.position.x -= delta * 0.35;
+                        z.legL.rotation.x = Math.sin(elapsedTime * 4) * 0.35;
+                        z.legR.rotation.x = -Math.sin(elapsedTime * 4) * 0.35;
                     } else {
-                        // Zombie attacks group!
-                        phase2State.vida = Math.max(0, phase2State.vida - delta * 15);
+                        phase2State.vida = Math.max(0, phase2State.vida - delta * 8);
                         updatePhase2HUD();
                         if (phase2State.vida <= 0) {
                             showGameOverModal();
                         }
                     }
                 });
+            } else if (currentPhase === 3) {
+                phase3State.rhythmPos += phase3State.rhythmDir * delta * 80;
+                if (phase3State.rhythmPos >= 96) {
+                    phase3State.rhythmPos = 96;
+                    phase3State.rhythmDir = -1;
+                } else if (phase3State.rhythmPos <= 0) {
+                    phase3State.rhythmPos = 0;
+                    phase3State.rhythmDir = 1;
+                }
+                const indicator = document.getElementById('rhythm-indicator');
+                if (indicator) {
+                    indicator.style.left = phase3State.rhythmPos + '%';
+                }
             }
 
             controls.update();
@@ -892,6 +1042,10 @@ ra);
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
+            const mobile = window.innerWidth < 640;
+            if (mobile && camera.position.length() < 22) {
+                camera.position.set(12, 12, 14);
+            }
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
